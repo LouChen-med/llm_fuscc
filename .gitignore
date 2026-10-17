@@ -20,6 +20,7 @@ example_patch/
 mllm_bbox/data/
 mllm_bbox/results/
 mllm_bbox/sources/
+mllm_bbox/repo/
 *.ndpi
 *.ndpa
 *.svs
