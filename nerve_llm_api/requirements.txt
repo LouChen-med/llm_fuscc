@@ -1,0 +1,5 @@
+Pillow>=10
+PyYAML>=6
+requests>=2.31
+pydantic>=2
+shapely>=2.0

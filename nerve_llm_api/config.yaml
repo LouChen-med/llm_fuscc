@@ -1,0 +1,311 @@
+# OpenAI-compatible Chat Completions 配置；模型参数只在各模型 params 中定义。
+metadata_csv: "../example_patch/positive_patches_final/patch_metadata.csv"
+output_dir: "../nerve_llm_out/runs"
+prompt: "prompts/nerve_detection_compact_v2.txt"
+annotation_mode: "polygon"
+max_image_width: 6144
+max_image_height: 6144
+
+providers:
+  jdcloud:
+    base_url: "https://modelservice.jdcloud.com/v1/chat/completions"
+    api_key_file: "../api/JoyBuilder_api.txt"
+    api_key_env: "JOYBUILDER_API_KEY"
+    timeout: 900
+    max_attempts: 3
+  openrouter:
+    base_url: "https://openrouter.ai/api/v1/chat/completions"
+    api_key_file: "../api/openrouter_api.txt"
+    api_key_env: "OPENROUTER_API_KEY"
+    timeout: 900
+    max_attempts: 3
+  openai:
+    base_url: "https://api.openai.com/v1/chat/completions"
+    api_key_env: "OPENAI_API_KEY"
+    timeout: 900
+    max_attempts: 3
+  aliyun:
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+    api_key_file: "../api/aliyun_key.txt"
+    api_key_env: "ALIYUN_NERVE_API_KEY"
+    timeout: 900
+    max_attempts: 1
+  lc_local:
+    base_url: "http://127.0.0.1:3000/v1/chat/completions"
+    api_key_file: "../api/codex_pro.txt"
+    api_key_env: "LC_API_KEY"
+    timeout: 900
+    max_attempts: 1
+  lc_public:
+    base_url: "https://api.aimedlc.com/v1/chat/completions"
+    api_key_file: "../api/codex_pro.txt"
+    api_key_env: "LC_API_KEY"
+    timeout: 900
+    max_attempts: 1
+
+models:
+  lc_gpt6_astra:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_astra_public:
+    provider: lc_public
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_astra_medium:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: medium
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_astra_high:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: high
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_astra_ultra:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: ultra
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_astra_compat:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+  lc_gpt61_sol_compat:
+    provider: lc_local
+    model: gpt-6.1-sol
+    params:
+      stream: false
+      max_tokens: 4096
+  lc_gpt6_astra_jpeg_low_detail:
+    provider: lc_local
+    model: gpt-6-astra
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: low
+  jd_gt6:
+    provider: jdcloud
+    model: gt-6-as-a
+    params:
+      max_tokens: 4096
+  jd_qwen:
+    provider: openrouter
+    model: qwen/qwen3.8-omni-flash
+    params:
+      max_tokens: 4096
+  qwen-3.8-omni-flash-a:
+    provider: openrouter
+    model: qwen/qwen3.8-omni-flash
+    params:
+      max_tokens: 4096
+  # 京东云模型 ID 原样保留；以下别名可直接传给 --model。
+  jd_kimi_k3:
+    provider: openrouter
+    model: moonshotai/kimi-k3
+    params:
+      max_tokens: 4096
+  kimi-k3:
+    provider: openrouter
+    model: moonshotai/kimi-k3
+    params:
+      max_tokens: 4096
+  jd_gt5_6_sol_b:
+    provider: jdcloud
+    model: gt-5.6-sol-b
+    params:
+      max_tokens: 4096
+  gt-5.6-sol-b:
+    provider: jdcloud
+    model: gt-5.6-sol-b
+    params:
+      max_tokens: 4096
+  jd_gt6_sol_a:
+    provider: jdcloud
+    model: gt-6-sol-a
+    params:
+      max_tokens: 4096
+  gt-6-sol-a:
+    provider: jdcloud
+    model: gt-6-sol-a
+    params:
+      max_tokens: 4096
+  jd_gt61_sol_a:
+    provider: jdcloud
+    model: gt-6.1-sol-a
+    params:
+      max_tokens: 4096
+  gt-6.1-sol-a:
+    provider: jdcloud
+    model: gt-6.1-sol-a
+    params:
+      max_tokens: 4096
+  jd_gt6_lu_a:
+    provider: jdcloud
+    model: gt-6-lu-a
+    params:
+      max_tokens: 4096
+  gt-6-lu-a:
+    provider: jdcloud
+    model: gt-6-lu-a
+    params:
+      max_tokens: 4096
+  jd_gt6_as_a_low:
+    provider: jdcloud
+    model: gt-6-as-a
+    params:
+      max_tokens: 4096
+      reasoning_effort: low
+  jd_gt61_sol_a_low:
+    provider: jdcloud
+    model: gt-6.1-sol-a
+    params:
+      max_tokens: 4096
+      reasoning_effort: low
+  jd_gt6_sol_a_low:
+    provider: jdcloud
+    model: gt-6-sol-a
+    params:
+      max_tokens: 4096
+      reasoning_effort: low
+  jd_gt6_lu_a_low:
+    provider: jdcloud
+    model: gt-6-lu-a
+    params:
+      max_tokens: 4096
+      reasoning_effort: low
+  jd_gt6_as_a:
+    provider: jdcloud
+    model: gt-6-as-a
+    params:
+      # Astra 部分复杂图像会把 4096 全部用于 reasoning，导致空 content；
+      # 复核请求留出 JSON 输出空间，同时仍由单请求上限控制费用。
+      max_tokens: 8192
+  gt-6-as-a:
+    provider: jdcloud
+    model: gt-6-as-a
+    params:
+      max_tokens: 4096
+  aliyun_qwen38_flash:
+    provider: aliyun
+    model: qwen3.8-flash
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  qwen3.8-flash:
+    provider: aliyun
+    model: qwen3.8-flash
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  aliyun_qwen38_max_0902:
+    provider: aliyun
+    model: qwen3.8-max-0902
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  qwen3.8-max-0902:
+    provider: aliyun
+    model: qwen3.8-max-0902
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  aliyun_qwen38_omni_flash:
+    provider: aliyun
+    model: qwen3.8-omni-flash
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  qwen3.8-omni-flash:
+    provider: aliyun
+    model: qwen3.8-omni-flash
+    params:
+      max_completion_tokens: 8192
+      response_format:
+        type: json_object
+  lc_gpt6_sol:
+    provider: lc_local
+    model: gpt-6-sol
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt61_sol:
+    provider: lc_local
+    model: gpt-6.1-sol
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: high
+  lc_gpt6_sol_original:
+    provider: lc_local
+    model: gpt-6-sol
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: original
+  lc_gpt61_sol_original:
+    provider: lc_local
+    model: gpt-6.1-sol
+    params:
+      stream: false
+      max_tokens: 4096
+      reasoning_effort: low
+      response_format:
+        type: json_object
+      image_detail: original
+  # 可按需增加其它 OpenAI-compatible 模型，例如：
+  # openai_vision:
+  #   provider: openai
+  #   model: gpt-4o-mini
+  #   params: {max_tokens: 4096}
+
+# 可选成本估算（美元/百万 token）；未知价格保持 null，不从客户端猜测。
+# pricing:
+#   jd_gt6: {input_usd_per_1m: 0.0, output_usd_per_1m: 0.0}

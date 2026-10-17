@@ -1,0 +1,39 @@
+# Secrets and local credentials
+api/
+**/*key*.txt
+**/*token*.txt
+.env
+.env.*
+
+# Temporary work, caches and generated outputs
+tmp/
+**/tmp/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+**/.pytest_cache/
+nerve_llm_out/
+patch_output/
+example_patch/
+
+# Large or generated experiment assets
+mllm_bbox/data/
+mllm_bbox/results/
+mllm_bbox/sources/
+*.ndpi
+*.ndpa
+*.svs
+*.tif
+*.tiff
+*.jpg
+*.jpeg
+*.png
+*.log
+
+# Local editor and build files
+.vscode/
+.idea/
+*.pyc
+dist/
+build/
+*.egg-info/
