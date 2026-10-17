@@ -4,6 +4,8 @@ api/
 **/*token*.txt
 .env
 .env.*
+AGENTS.md
+**/AGENTS.md
 
 # Temporary work, caches and generated outputs
 tmp/
