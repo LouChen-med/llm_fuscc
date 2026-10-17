@@ -1,39 +1,77 @@
-# 神经阳性 Patch 提取器
+# nerve_patch_extractor
 
-从乳腺癌 NDPI 和配套 NDPA 读取元数据与人工几何标注，生成带可追溯 Level 0 坐标的 PNG Patch。原始 WSI/NDPA 只读；所有调试和提取结果写入 tmp，正式汇总样本写入 ../example_patch/positive_patches_final/。
+乳腺癌 NDPI/NDPA 的 Patch 提取模块。它读取原始 WSI 和 NDPA 几何标注，生成带 Level 0 坐标变换的 PNG、CSV 元数据和切片级元数据，供 `nerve_llm_api` 使用。
 
-## 输入
+## 主要功能
 
-- E:\BRC\Projects\nerve_project\FUSCC_WSI\*.ndpi
-- 同名 *.ndpi.ndpa（坐标为 nanometers）
-- OpenSlide 提供的实际 openslide.mpp-x/y 和 Hamamatsu 扫描偏移
+- 读取项目外 `FUSCC_WSI/` 中的 NDPI 与同名 NDPA。
+- 支持单张 WSI、多个指定 WSI、输入目录批量处理。
+- 支持完整网格和 `--ndpa-positive` 定向采样。
+- 输出 Patch、几何元数据、MPP、坐标变换、组织过滤和验证摘要。
+- NDPA 几何只用于采样和人工参考，不由本模块推断神经语义。
 
-程序不读取 NDPA 以外的语义标签来判定“神经阳性”；定向模式只把 NDPA 几何作为采样位置，并在元数据中标记 semantic_label=unverified。
+## 文件树与说明
 
-## 运行
+```text
+nerve_patch_extractor/
+├── main.py                 命令行入口、网格/定向提取和验证
+├── wsi.py                  WSI、NDPA、MPP 与坐标变换实现
+└── README.md               本模块说明
+```
 
-完整网格（保留 20% 以上重叠）：
+输出目录通常包含：
 
-~~~powershell
-& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\main.py' --slide 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi' --ndpa 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi.ndpa' --output 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\tmp\grid_002' --patch-size 6144 --target-mpp 0.5 --overlap 0.2
-~~~
+```text
+<output>/
+├── patches/*.png
+├── patch_metadata.csv
+├── grid_metadata.csv
+├── slide_metadata.json
+├── extraction_summary.json
+└── verification.json
+```
 
-按每个 NDPA 几何生成居中、完整容纳的定向 Patch：
+## 使用与阅读顺序
 
-~~~powershell
-& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\main.py' --slide 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi' --ndpa 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi.ndpa' --output 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\tmp\directed_002_1024' --patch-size 1024 --target-mpp 0.5 --overlap 0.2 --ndpa-positive
-~~~
+先阅读项目根目录 `README.md`，再阅读 `main.py` 的参数定义和 `wsi.py` 的坐标变换。运行前确认 WSI/NDPA 路径、目标 MPP、Patch 尺寸和输出目录；输出目录应使用新目录，避免覆盖已有整理数据。
 
---ndpa-positive 会为每个有效 NDPA 外包框计算中心原点，合并相同原点，记录 annotation_ids、annotation_count、annotation_local_bboxes 和 annotation_local_points。定向 Patch 不再被组织占比阈值删除，但仍记录 tissue_fraction；完整网格仍使用组织过滤。若标注外包框超过目标 Patch，程序记录 geometry_exceeds_patch，应改用 2048 或 4096 补充 Patch。
+项目使用已有 Conda 环境：
 
-## 输出
+```powershell
+& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python -c "import sys; print(sys.executable); print(sys.version)"
+```
 
-每个提取目录包括 patches/*.png、patch_metadata.csv、grid_metadata.csv、slide_metadata.json、extraction_summary.json、预览图和 verification.json。CSV 中的 coordinate_transform.patch_to_level0 可把局部 PNG 坐标映射回 WSI Level 0；valid_level0_* 和 valid_patch_* 描述边缘补白有效区域。
+## 代码运行顺序
 
-python main.py --self-test 不读取 WSI；它验证 MPP、非等轴缩放、网格覆盖、坐标往返、NDPA、补白和组织过滤。
+### 不读取 WSI 的自检
 
-本次汇总目录：E:\BRC\Projects\nerve_project\tmp\llm_fuscc\example_patch\positive_patches_final\，包含 44 张 Patch/44 个可解析标注；普通标注使用 2048×2048，016/12 与 019/13 使用 _large4096 补充 Patch。
+```powershell
+& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\main.py' --self-test
+```
 
-阳性 Patch 总览图
+### 单张 WSI 定向提取
 
-`E:\BRC\Projects\nerve_project\tmp\llm_fuscc\example_patch\positive_patches_final\overlays\` 保存按切片生成的选择总览图：每张 `{slide_id}_patch_overlay.png` 都在 WSI 缩略图上绘制最终选中的 Patch Level 0 矩形；绿色为 2048×2048，橙色为 4096×4096，框内编号对应 `patch_overlay_index.csv`。总览使用 `patch_metadata_no005.csv`，即排除已确认无神经的 FUSCCTNBC005，共 40 条记录、8 张切片。原始 44 条元数据仍保留在上级目录用于审计。
+```powershell
+& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\main.py' `
+  --slide 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi' `
+  --ndpa 'E:\BRC\Projects\nerve_project\FUSCC_WSI\FUSCCTNBC002.ndpi.ndpa' `
+  --output-dir 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\tmp\extract_002' `
+  --patch-size 2048 --target-mpp 0.5 --overlap 0.2 --ndpa-positive
+```
+
+### 多张或批量提取
+
+使用 `--slides` 指定多个 WSI，或使用 `--input-dir` 指定包含 NDPI/NDPA 的目录；仍建议明确传入新的 `--output-dir`。`--slide` 可用于选择单张切片，`--ndpa` 可覆盖自动匹配的 NDPA 路径。
+
+### 验证提取结果
+
+```powershell
+& 'D:\software\Anaconda\Scripts\conda.exe' run -n brc_nerve_small python 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\nerve_patch_extractor\main.py' `
+  --verify --output-dir 'E:\BRC\Projects\nerve_project\tmp\llm_fuscc\tmp\extract_002'
+```
+
+`patch_metadata.csv` 中的 `coordinate_transform.patch_to_level0` 将 Patch 像素坐标映射到 WSI Level 0；`slide_metadata.json` 保存 NDPA 几何参考。缺少原始 WSI/NDPA 时应明确报错，不能用空参考替代。
+
+## 与其他模块的衔接
+
+固定的 `example_patch/positive_patches_final/` 是已经整理好的 44 张 Patch，不由本模块自动汇总生成。提取新数据时输出到独立目录，再将确认过的 PNG 与元数据交给 `nerve_llm_api`；不得覆盖该整理目录或历史模型结果。
